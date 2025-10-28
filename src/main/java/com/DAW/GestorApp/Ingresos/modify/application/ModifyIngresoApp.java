@@ -1,6 +1,5 @@
 package com.DAW.GestorApp.Ingresos.modify.application;
 
-import com.DAW.GestorApp.Ingresos.modify.domain.command.ModifyIngresoCommand;
 import com.DAW.GestorApp.Ingresos.modify.domain.response.ModifyIngresoResponse;
 import com.DAW.GestorApp.Ingresos.modify.domain.service.ModifyIngresoService;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,10 @@ public class ModifyIngresoApp {
     }
 
     public ModifyIngresoResponse put(Long id, ModifyIngresoRequest req) {
-        return service.update(id, new ModifyIngresoCommand(req.descripcion(), req.monto(), req.fecha()), false);
+        return service.update(id, req, false);
     }
 
     public ModifyIngresoResponse patch(Long id, ModifyIngresoRequest req) {
-        return service.update(id, new ModifyIngresoCommand(req.descripcion(), req.monto(), req.fecha()), true);
+        return service.update(id, req, true);
     }
 }
