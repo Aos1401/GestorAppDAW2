@@ -25,12 +25,12 @@ form {
     margin-bottom: 20px;
 }
 
-form input, form select, form button {
+form input, form select, form button,  #vistaSelector{
     padding: 10px;
     font-size: 16px;
 }
 
-form input, form select {
+form input, form select, div select {
     flex: 1;
 }
 
