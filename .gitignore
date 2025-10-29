@@ -115,4 +115,5 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
+*.lst
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,java
