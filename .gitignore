@@ -115,30 +115,5 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
+*.lst
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,java
-
-# Maven build
-/target/
-
-# IDEs
-.idea/
-.vscode/
-*.iml
-*.classpath
-*.project
-*.settings/
-bin/
-out/
-
-# OS
-.DS_Store
-*/.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Environment / credentials
-*.env
-application-*.properties
-*.sql

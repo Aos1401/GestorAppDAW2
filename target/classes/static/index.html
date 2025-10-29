@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestor de Gastos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+<div class="container">
+    <h1>Gestor de Gastos</h1>
+
+    <form id="gastoForm">
+        <input type="hidden" id="gastoId">
+        <input type="text" id="descripcion" placeholder="Descripción" required>
+        <input type="number" id="monto" placeholder="Monto" step="0.01" required>
+        <input type="date" id="fecha" required>
+        <select id="categoria">
+            <option value="ALIMENTACION">Alimentación</option>
+            <option value="TRANSPORTE">Transporte</option>
+            <option value="VIVIENDA">Vivienda</option>
+            <option value="OCIO">Ocio</option>
+            <option value="OTROS">Otros</option>
+        </select>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <h2>Lista de Gastos</h2>
+    <table id="gastosTable">
+        <thead>
+        <tr>
+            <th>Descripción</th>
+            <th>Monto (€)</th>
+            <th>Fecha</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="gastosList"></tbody>
+    </table>
+
+    <div id="totalGastos">Total: 0 €</div>
+</div>
+</body>
+</html>

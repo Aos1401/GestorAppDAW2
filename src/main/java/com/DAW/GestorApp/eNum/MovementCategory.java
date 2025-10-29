@@ -1,4 +1,9 @@
 package com.DAW.GestorApp.eNum;
 
-public class MovementCategory {
+public enum MovementCategory {
+    ALIMENTACION,
+    TRANSPORTE,
+    VIVIENDA,
+    OCIO,
+    OTROS
 }
