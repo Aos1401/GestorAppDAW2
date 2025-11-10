@@ -1,84 +1,158 @@
+/* Colores base */
+:root {
+    --color-income-main: #4CAF50;
+    --color-income-hover: #45a049;
+    --color-expense-main: #F44336;
+    --color-expense-hover: #d32f2f;
+    --color-primary-bg: #f4f4f4;
+    --color-secondary-bg: white;
+    --color-text-dark: #333;
+}
+
+/* Base */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-primary-bg);
     margin: 0;
-    padding: 0;
+    padding: 20px;
+    color: var(--color-text-dark);
 }
 
 .container {
-    max-width: 800px;
-    margin: 50px auto;
-    background: white;
+    max-width: 1300px;
+    margin: 0 auto;
+    background: var(--color-secondary-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 30px;
+}
+
+.panel {
+    margin-bottom: 30px;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-h1, h2 {
-    text-align: center;
+/* Ingresos */
+.income-panel {
+    border: 1px solid var(--color-income-main);
 }
 
+.income-panel h2 {
+    color: var(--color-income-main);
+    border-bottom: 2px solid var(--color-income-main);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.income-btn {
+    background-color: var(--color-income-main);
+    color: white;
+}
+
+.income-btn:hover {
+    background-color: var(--color-income-hover);
+}
+
+/* Gastos */
+.expense-panel {
+    border: 1px solid var(--color-expense-main);
+}
+
+.expense-panel h2 {
+    color: var(--color-expense-main);
+    border-bottom: 2px solid var(--color-expense-main);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.expense-btn {
+    background-color: var(--color-expense-main);
+    color: white;
+}
+
+.expense-btn:hover {
+    background-color: var(--color-expense-hover);
+}
+
+/* Formularios */
 form {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
-}
-
-form input, form select, form button,  #vistaSelector{
     padding: 10px;
-    font-size: 16px;
+    border-radius: 8px;
+    background-color: var(--color-primary-bg);
 }
 
-form input, form select, div select {
-    flex: 1;
+form input, form select {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex-grow: 1;
+    min-width: 120px;
 }
 
 form button {
-    background-color: #4CAF50;
-    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
+    flex-grow: 1;
 }
 
-form button:hover {
-    background-color: #45a049;
+/* Tablas */
+.table-container {
+    overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-top: 15px;
+    font-size: 14px;
 }
 
-table, th, td {
+table th, table td {
     border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 12px;
+    padding: 10px 8px;
     text-align: center;
 }
 
-th {
-    background-color: #4CAF50;
-    color: white;
-}
+#ingresosTable thead th { background-color: var(--color-income-main); color: white; }
+#gastosTable thead th { background-color: var(--color-expense-main); color: white; }
 
-button.editBtn, button.delBtn {
-    margin: 0 5px;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
+/* Botones de acción */
+button.editBtn { background-color: #2196F3; color: white; padding: 5px 8px; border-radius:5px; }
+button.delBtn { background-color: #9e9e9e; color: white; padding: 5px 8px; border-radius:5px; }
+
+button.editBtn:hover { background-color: #0b7dda; }
+button.delBtn:hover { background-color: #616161; }
+
+/* Totales */
+.total-summary {
+    font-weight: bold;
+    padding: 10px;
+    margin-top: 10px;
     border-radius: 5px;
+    text-align: right;
+    font-size: 1.1em;
 }
 
-button.editBtn {
-    background-color: #2196F3;
-    color: white;
-}
+#totalIngresos { color: var(--color-income-main); background-color: rgba(76,175,80,0.1); }
+#totalGastos { color: var(--color-expense-main); background-color: rgba(244,67,54,0.1); }
 
-button.delBtn {
-    background-color: #f44336;
-    color: white;
+/* Responsive */
+@media(max-width:768px){
+    .container { padding: 15px; }
 }

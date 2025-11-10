@@ -2,31 +2,66 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Gastos e Ingresos</title>
   <link rel="stylesheet" href="style.css" />
   <script src="app.js" defer></script>
 </head>
 <body>
 <div class="container">
-  <h1>Gestor</h1>
+  <h1>Gestor de Finanzas Personales</h1>
 
-  <!-- Selector de vista -->
-  <label for="vistaSelector" style="display:block; margin-bottom:12px;">
-    Vista:
-  </label>
-  <select id="vistaSelector">
-    <option value="gastos" selected>Gastos</option>
-    <option value="ingresos">Ingresos</option>
-  </select>
+  <!-- ==================== RESUMEN ==================== -->
+  <section id="resumenSection" class="resumen-panel panel">
+    <h2>📊 Resumen Financiero</h2>
+    <p id="totalIngresosResumen">Total Ingresos: 0 €</p>
+    <p id="totalGastosResumen">Total Gastos: 0 €</p>
+    <p id="saldoActual">Saldo Actual: 0 €</p>
+  </section>
+
+  <!-- ==================== INGRESOS ==================== -->
+  <section id="ingresosSection" class="income-panel panel">
+    <h2>💰 Ingresos</h2>
+    <form id="ingresoForm" class="income-form">
+      <input type="hidden" id="ingresoId" />
+      <input type="text" id="ingresoDescripcion" placeholder="Descripción" required />
+      <input type="number" id="ingresoMonto" placeholder="Monto (€)" step="0.01" required />
+      <input type="date" id="ingresoFecha" required />
+      <select id="ingresoCategoria">
+        <option value="SALARIO">Salario</option>
+        <option value="FREELANCE">Freelance</option>
+        <option value="INVERSIONES">Inversiones</option>
+        <option value="REEMBOLSOS">Reembolsos</option>
+        <option value="OTROS">Otros</option>
+      </select>
+      <button type="submit" class="income-btn">Guardar Ingreso</button>
+    </form>
+
+    <h3>Lista de Ingresos</h3>
+    <div id="totalIngresos" class="total-summary" data-total="0">Total Ingresos: 0 €</div>
+    <div class="table-container">
+      <table id="ingresosTable">
+        <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Monto (€)</th>
+          <th>Fecha</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="ingresosList"></tbody>
+      </table>
+    </div>
+  </section>
 
   <!-- ==================== GASTOS ==================== -->
-  <section id="gastosSection">
-    <h2>Gestor de Gastos</h2>
-
-    <form id="gastoForm">
+  <section id="gastosSection" class="expense-panel panel">
+    <h2>💸 Gastos</h2>
+    <form id="gastoForm" class="expense-form">
       <input type="hidden" id="gastoId" />
       <input type="text" id="gastoDescripcion" placeholder="Descripción" required />
-      <input type="number" id="gastoMonto" placeholder="Monto" step="0.01" required />
+      <input type="number" id="gastoMonto" placeholder="Monto (€)" step="0.01" required />
       <input type="date" id="gastoFecha" required />
       <select id="gastoCategoria">
         <option value="ALIMENTACION">Alimentación</option>
@@ -35,63 +70,25 @@
         <option value="OCIO">Ocio</option>
         <option value="OTROS">Otros</option>
       </select>
-      <button type="submit">Guardar</button>
+      <button type="submit" class="expense-btn">Guardar Gasto</button>
     </form>
 
     <h3>Lista de Gastos</h3>
-    <table id="gastosTable">
-      <thead>
-      <tr>
-        <th>Descripción</th>
-        <th>Monto (€)</th>
-        <th>Fecha</th>
-        <th>Categoría</th>
-        <th>Acciones</th>
-      </tr>
-      </thead>
-      <tbody id="gastosList"></tbody>
-    </table>
-
-    <div id="totalGastos">Total: 0 €</div>
-  </section>
-
-  <!-- ==================== INGRESOS ==================== -->
-  <section id="ingresosSection" style="display:none;">
-    <h2>Gestor de Ingresos</h2>
-
-    <form id="ingresoForm">
-      <input type="hidden" id="ingresoId" />
-      <input type="text" id="ingresoDescripcion" placeholder="Descripción" required />
-      <input type="number" id="ingresoMonto" placeholder="Monto" step="0.01" required />
-      <input type="date" id="ingresoFecha" required />
-      <select id="ingresoCategoria">
-        <option value="TRANSPORTE">Transporte</option>
-        <option value="ALIMENTACION">Alimentacion</option>
-        <option value="OCIO">Ocio</option>
-        <option value="FREELANCE">Freelance</option>
-        <option value="INVERSIONES">Inversiones</option>
-        <option value="SALARIO">Salario</option>
-        <option value="REEMBOLSOS">Reembolsos</option>
-        <option value="OTROS">Otros</option>
-      </select>
-      <button type="submit">Guardar</button>
-    </form>
-
-    <h3>Lista de Ingresos</h3>
-    <table id="ingresosTable">
-      <thead>
-      <tr>
-        <th>Descripción</th>
-        <th>Monto (€)</th>
-        <th>Fecha</th>
-        <th>Categoría</th>
-        <th>Acciones</th>
-      </tr>
-      </thead>
-      <tbody id="ingresosList"></tbody>
-    </table>
-
-    <div id="totalIngresos">Total: 0 €</div>
+    <div id="totalGastos" class="total-summary" data-total="0">Total Gastos: 0 €</div>
+    <div class="table-container">
+      <table id="gastosTable">
+        <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Monto (€)</th>
+          <th>Fecha</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="gastosList"></tbody>
+      </table>
+    </div>
   </section>
 </div>
 </body>
