@@ -1,21 +1,51 @@
-// =================== CONFIG ===================
 const API_GASTOS = "http://localhost:8081/gastos";
 const API_INGRESOS = "http://localhost:8081/ingresos";
-
-// =================== UTILIDADES ===================
 const $ = (sel) => document.querySelector(sel);
-const fmt = (num) => (Number(num) || 0).toFixed(2);
+const fmt = (num) => (Number(num) || 0).toFixed(2) + " €";
 
-// ==========================================================
-// =================== ACTUALIZAR RESUMEN ===================
+let grafico;
+
+// ==================== ACTUALIZAR RESUMEN ====================
 function actualizarResumen(totalIngresos, totalGastos) {
-  $("#totalIngresosResumen").textContent = `Total Ingresos: ${totalIngresos.toFixed(2)} €`;
-  $("#totalGastosResumen").textContent = `Total Gastos: ${totalGastos.toFixed(2)} €`;
-  $("#saldoActual").textContent = `Saldo Actual: ${(totalIngresos - totalGastos).toFixed(2)} €`;
+  $("#totalIngresosResumen").textContent = `${fmt(totalIngresos)} €`;
+  $("#totalGastosResumen").textContent = `${fmt(totalGastos)} €`;
+  $("#saldoActual").textContent = `${fmt(totalIngresos - totalGastos)} €`;
+  actualizarGrafico(totalIngresos, totalGastos);
 }
 
-// ==========================================================
-// =================== CRUD GASTOS ==========================
+// ==================== GRÁFICO PIE ====================
+function actualizarGrafico(totalIngresos, totalGastos) {
+  const ctx = document.getElementById("graficoFinanzas");
+
+  const data = {
+    labels: ["Ingresos", "Gastos"],
+    datasets: [{
+      data: [totalIngresos, totalGastos],
+      backgroundColor: ["#4CAF50", "#F44336"],
+      borderColor: ["#388E3C", "#C62828"],
+      borderWidth: 2
+    }]
+  };
+
+  const options = {
+    responsive: false,
+    maintainAspectRatio: false,
+    animation: { animateScale: true },
+    plugins: {
+      legend: { position: "bottom" },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.label}: ${fmt(context.parsed)} €`
+        }
+      }
+    }
+  };
+
+  if (grafico) grafico.destroy();
+  grafico = new Chart(ctx, { type: "pie", data, options });
+}
+
+// ==================== CRUD GASTOS ====================
 async function listarGastos() {
   try {
     const res = await fetch(API_GASTOS);
@@ -40,7 +70,7 @@ async function listarGastos() {
       `;
       tr.querySelector(".editBtn").onclick = () => cargarGasto(gasto);
       tr.querySelector(".delBtn").onclick = async () => {
-        if(confirm("¿Seguro que quieres eliminar este gasto?")){
+        if (confirm("¿Seguro que quieres eliminar este gasto?")) {
           await fetch(`${API_GASTOS}/${gasto.id}`, { method: "DELETE" });
           listarGastos();
           listarIngresos();
@@ -59,7 +89,7 @@ async function listarGastos() {
   }
 }
 
-function cargarGasto(gasto){
+function cargarGasto(gasto) {
   $("#gastoForm button").textContent = "Actualizar Gasto";
   $("#gastoId").value = gasto.id;
   $("#gastoDescripcion").value = gasto.descripcion;
@@ -68,7 +98,7 @@ function cargarGasto(gasto){
   $("#gastoCategoria").value = gasto.categoria;
 }
 
-$("#gastoForm").addEventListener("submit", async e=>{
+$("#gastoForm").addEventListener("submit", async e => {
   e.preventDefault();
   const id = $("#gastoId").value;
   const data = {
@@ -80,7 +110,11 @@ $("#gastoForm").addEventListener("submit", async e=>{
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_GASTOS}/${id}` : API_GASTOS;
 
-  await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+  await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 
   $("#gastoForm").reset();
   $("#gastoId").value = "";
@@ -88,8 +122,7 @@ $("#gastoForm").addEventListener("submit", async e=>{
   listarGastos();
 });
 
-// ==========================================================
-// =================== CRUD INGRESOS ========================
+// ==================== CRUD INGRESOS ====================
 async function listarIngresos() {
   try {
     const res = await fetch(API_INGRESOS);
@@ -114,7 +147,7 @@ async function listarIngresos() {
       `;
       tr.querySelector(".editBtn").onclick = () => cargarIngreso(ingreso);
       tr.querySelector(".delBtn").onclick = async () => {
-        if(confirm("¿Seguro que quieres eliminar este ingreso?")){
+        if (confirm("¿Seguro que quieres eliminar este ingreso?")) {
           await fetch(`${API_INGRESOS}/${ingreso.id}`, { method: "DELETE" });
           listarIngresos();
           listarGastos();
@@ -133,7 +166,7 @@ async function listarIngresos() {
   }
 }
 
-function cargarIngreso(ingreso){
+function cargarIngreso(ingreso) {
   $("#ingresoForm button").textContent = "Actualizar Ingreso";
   $("#ingresoId").value = ingreso.id;
   $("#ingresoDescripcion").value = ingreso.descripcion;
@@ -142,7 +175,7 @@ function cargarIngreso(ingreso){
   $("#ingresoCategoria").value = ingreso.categoria;
 }
 
-$("#ingresoForm").addEventListener("submit", async e=>{
+$("#ingresoForm").addEventListener("submit", async e => {
   e.preventDefault();
   const id = $("#ingresoId").value;
   const data = {
@@ -154,7 +187,11 @@ $("#ingresoForm").addEventListener("submit", async e=>{
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_INGRESOS}/${id}` : API_INGRESOS;
 
-  await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+  await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 
   $("#ingresoForm").reset();
   $("#ingresoId").value = "";
@@ -162,7 +199,6 @@ $("#ingresoForm").addEventListener("submit", async e=>{
   listarIngresos();
 });
 
-// ==========================================================
-// =================== INICIALIZACIÓN ========================
+// ==================== INICIALIZACIÓN ====================
 listarGastos();
 listarIngresos();

@@ -1,95 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestor de Gastos e Ingresos</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Gestor de Finanzas Vertical</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js" defer></script>
 </head>
 <body>
-<div class="container">
-  <h1>Gestor de Finanzas Personales</h1>
+<h1>Gestor de Finanzas Personales</h1>
 
-  <!-- ==================== RESUMEN ==================== -->
-  <section id="resumenSection" class="resumen-panel panel">
-    <h2>📊 Resumen Financiero</h2>
-    <p id="totalIngresosResumen">Total Ingresos: 0 €</p>
-    <p id="totalGastosResumen">Total Gastos: 0 €</p>
-    <p id="saldoActual">Saldo Actual: 0 €</p>
-  </section>
+<!-- RESUMEN -->
+<section class="panel resumen">
+  <h2>📊 Resumen Financiero</h2>
+  <div class="resumen-datos">
+    <p>Total Ingresos: <span id="totalIngresosResumen">0 €</span></p>
+    <p>Total Gastos: <span id="totalGastosResumen">0 €</span></p>
+    <p>Saldo Actual: <span id="saldoActual">0 €</span></p>
+  </div>
+  <canvas id="graficoFinanzas"></canvas>
+</section>
 
-  <!-- ==================== INGRESOS ==================== -->
-  <section id="ingresosSection" class="income-panel panel">
-    <h2>💰 Ingresos</h2>
-    <form id="ingresoForm" class="income-form">
-      <input type="hidden" id="ingresoId" />
-      <input type="text" id="ingresoDescripcion" placeholder="Descripción" required />
-      <input type="number" id="ingresoMonto" placeholder="Monto (€)" step="0.01" required />
-      <input type="date" id="ingresoFecha" required />
-      <select id="ingresoCategoria">
-        <option value="SALARIO">Salario</option>
-        <option value="FREELANCE">Freelance</option>
-        <option value="INVERSIONES">Inversiones</option>
-        <option value="REEMBOLSOS">Reembolsos</option>
-        <option value="OTROS">Otros</option>
-      </select>
-      <button type="submit" class="income-btn">Guardar Ingreso</button>
-    </form>
+<!-- INGRESOS -->
+<section class="panel ingresos">
+  <h2>💰 Ingresos</h2>
+  <form id="ingresoForm">
+    <input type="hidden" id="ingresoId">
+    <input type="text" id="ingresoDescripcion" placeholder="Descripción" required>
+    <input type="number" id="ingresoMonto" placeholder="Monto (€)" step="0.01" required>
+    <input type="date" id="ingresoFecha" required>
+    <select id="ingresoCategoria">
+      <option value="SALARIO">Salario</option>
+      <option value="FREELANCE">Freelance</option>
+      <option value="INVERSIONES">Inversiones</option>
+      <option value="REEMBOLSOS">Reembolsos</option>
+      <option value="OTROS">Otros</option>
+    </select>
+    <button type="submit" class="income-btn">Guardar</button>
+  </form>
+  <div class="total">Total Ingresos: <span id="totalIngresos">0 €</span></div>
+  <table id="ingresosTable">
+    <thead>
+    <tr>
+      <th>Descripción</th>
+      <th>Monto</th>
+      <th>Fecha</th>
+      <th>Categoría</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody id="ingresosList"></tbody>
+  </table>
+</section>
 
-    <h3>Lista de Ingresos</h3>
-    <div id="totalIngresos" class="total-summary" data-total="0">Total Ingresos: 0 €</div>
-    <div class="table-container">
-      <table id="ingresosTable">
-        <thead>
-        <tr>
-          <th>Descripción</th>
-          <th>Monto (€)</th>
-          <th>Fecha</th>
-          <th>Categoría</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody id="ingresosList"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ==================== GASTOS ==================== -->
-  <section id="gastosSection" class="expense-panel panel">
-    <h2>💸 Gastos</h2>
-    <form id="gastoForm" class="expense-form">
-      <input type="hidden" id="gastoId" />
-      <input type="text" id="gastoDescripcion" placeholder="Descripción" required />
-      <input type="number" id="gastoMonto" placeholder="Monto (€)" step="0.01" required />
-      <input type="date" id="gastoFecha" required />
-      <select id="gastoCategoria">
-        <option value="ALIMENTACION">Alimentación</option>
-        <option value="TRANSPORTE">Transporte</option>
-        <option value="VIVIENDA">Vivienda</option>
-        <option value="OCIO">Ocio</option>
-        <option value="OTROS">Otros</option>
-      </select>
-      <button type="submit" class="expense-btn">Guardar Gasto</button>
-    </form>
-
-    <h3>Lista de Gastos</h3>
-    <div id="totalGastos" class="total-summary" data-total="0">Total Gastos: 0 €</div>
-    <div class="table-container">
-      <table id="gastosTable">
-        <thead>
-        <tr>
-          <th>Descripción</th>
-          <th>Monto (€)</th>
-          <th>Fecha</th>
-          <th>Categoría</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody id="gastosList"></tbody>
-      </table>
-    </div>
-  </section>
-</div>
+<!-- GASTOS -->
+<section class="panel gastos">
+  <h2>💸 Gastos</h2>
+  <form id="gastoForm">
+    <input type="hidden" id="gastoId">
+    <input type="text" id="gastoDescripcion" placeholder="Descripción" required>
+    <input type="number" id="gastoMonto" placeholder="Monto (€)" step="0.01" required>
+    <input type="date" id="gastoFecha" required>
+    <select id="gastoCategoria">
+      <option value="ALIMENTACION">Alimentación</option>
+      <option value="TRANSPORTE">Transporte</option>
+      <option value="VIVIENDA">Vivienda</option>
+      <option value="OCIO">Ocio</option>
+      <option value="OTROS">Otros</option>
+    </select>
+    <button type="submit" class="expense-btn">Guardar</button>
+  </form>
+  <div class="total">Total Gastos: <span id="totalGastos">0 €</span></div>
+  <table id="gastosTable">
+    <thead>
+    <tr>
+      <th>Descripción</th>
+      <th>Monto</th>
+      <th>Fecha</th>
+      <th>Categoría</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody id="gastosList"></tbody>
+  </table>
+</section>
 </body>
 </html>
