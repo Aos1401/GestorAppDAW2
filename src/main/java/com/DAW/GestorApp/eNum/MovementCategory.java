@@ -8,6 +8,7 @@ public enum MovementCategory {
     INVERSIONES,
     SALARIO,
     REEMBOLSOS,
-    FREELANCE
+    FREELANCE,
+    VIVIENDA
 }
 

@@ -1,6 +1,5 @@
 package com.DAW.GestorApp.Gastos.add.domain;
 
-
 import com.DAW.GestorApp.eNum.MovementCategory;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -36,4 +35,3 @@ public class Gasto {
     public MovementCategory getCategoria() { return categoria; }
     public void setCategoria(MovementCategory categoria) { this.categoria = categoria; }
 }
-
