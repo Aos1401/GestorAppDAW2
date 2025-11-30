@@ -1,88 +1,308 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Gestor de Finanzas Vertical</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app.js" defer></script>
+    <meta charset="UTF-8" />
+    <title>Gestor de Finanzas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Fonte mais moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/drawer.js" defer></script>
+    <script src="js/chart-finance.js" defer></script>
+    <script src="js/attachments.js" defer></script>
+    <script src="js/gastos.js" defer></script>
+    <script src="js/ingresos.js" defer></script>
+    <script src="js/main.js" defer></script>
 </head>
 <body>
-<h1>Gestor de Finanzas Personales</h1>
+<div class="app-shell">
 
-<!-- RESUMEN -->
-<section class="panel resumen">
-  <h2>📊 Resumen Financiero</h2>
-  <div class="resumen-datos">
-    <p>Total Ingresos: <span id="totalIngresosResumen">0 €</span></p>
-    <p>Total Gastos: <span id="totalGastosResumen">0 €</span></p>
-    <p>Saldo Actual: <span id="saldoActual">0 €</span></p>
-  </div>
-  <canvas id="graficoFinanzas"></canvas>
-</section>
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="app-header__title">
+            <h1>Gestor de Finanzas Personales</h1>
+            <p>Controla tus ingresos, gastos y saldo de forma visual y sencilla.</p>
+        </div>
 
-<!-- INGRESOS -->
-<section class="panel ingresos">
-  <h2>💰 Ingresos</h2>
-  <form id="ingresoForm">
-    <input type="hidden" id="ingresoId">
-    <input type="text" id="ingresoDescripcion" placeholder="Descripción" required>
-    <input type="number" id="ingresoMonto" placeholder="Monto (€)" step="0.01" required>
-    <input type="date" id="ingresoFecha" required>
-    <select id="ingresoCategoria">
-      <option value="SALARIO">Salario</option>
-      <option value="FREELANCE">Freelance</option>
-      <option value="INVERSIONES">Inversiones</option>
-      <option value="REEMBOLSOS">Reembolsos</option>
-      <option value="OTROS">Otros</option>
-    </select>
-    <button type="submit" class="income-btn">Guardar</button>
-  </form>
-  <div class="total">Total Ingresos: <span id="totalIngresos">0 €</span></div>
-  <table id="ingresosTable">
-    <thead>
-    <tr>
-      <th>Descripción</th>
-      <th>Monto</th>
-      <th>Fecha</th>
-      <th>Categoría</th>
-      <th>Acciones</th>
-    </tr>
-    </thead>
-    <tbody id="ingresosList"></tbody>
-  </table>
-</section>
+        <div class="app-header__actions">
+            <button type="button" id="btnUltimos" class="btn btn-outline">
+                Últimos movimientos
+            </button>
+        </div>
+    </header>
 
-<!-- GASTOS -->
-<section class="panel gastos">
-  <h2>💸 Gastos</h2>
-  <form id="gastoForm">
-    <input type="hidden" id="gastoId">
-    <input type="text" id="gastoDescripcion" placeholder="Descripción" required>
-    <input type="number" id="gastoMonto" placeholder="Monto (€)" step="0.01" required>
-    <input type="date" id="gastoFecha" required>
-    <select id="gastoCategoria">
-      <option value="ALIMENTACION">Alimentación</option>
-      <option value="TRANSPORTE">Transporte</option>
-      <option value="VIVIENDA">Vivienda</option>
-      <option value="OCIO">Ocio</option>
-      <option value="OTROS">Otros</option>
-    </select>
-    <button type="submit" class="expense-btn">Guardar</button>
-  </form>
-  <div class="total">Total Gastos: <span id="totalGastos">0 €</span></div>
-  <table id="gastosTable">
-    <thead>
-    <tr>
-      <th>Descripción</th>
-      <th>Monto</th>
-      <th>Fecha</th>
-      <th>Categoría</th>
-      <th>Acciones</th>
-    </tr>
-    </thead>
-    <tbody id="gastosList"></tbody>
-  </table>
-</section>
+    <!-- MAIN LAYOUT -->
+    <main class="app-main">
+
+        <!-- COLUNA ESQUERDA: RESUMEN -->
+        <section class="panel panel-resumen">
+            <div class="panel-header">
+                <h2>Resumen financiero</h2>
+                <span class="panel-tag">Vista general</span>
+            </div>
+
+            <div class="resumen-grid">
+                <div class="resumen-card resumen-card--ingresos">
+                    <span class="resumen-label">Total ingresos</span>
+                    <span id="totalIngresosResumen" class="resumen-value">0 €</span>
+                </div>
+                <div class="resumen-card resumen-card--gastos">
+                    <span class="resumen-label">Total gastos</span>
+                    <span id="totalGastosResumen" class="resumen-value">0 €</span>
+                </div>
+                <div class="resumen-card resumen-card--saldo">
+                    <span class="resumen-label">Saldo actual</span>
+                    <span id="saldoActual" class="resumen-value">0 €</span>
+                </div>
+            </div>
+
+            <div class="panel-chart">
+                <h3>Distribución actual</h3>
+                <canvas id="graficoFinanzas"></canvas>
+            </div>
+        </section>
+
+        <!-- COLUNA DIREITA: FORM + TABELAS -->
+        <section class="panel panel-movimientos">
+            <div class="movimientos-columns">
+
+                <!-- INGRESOS -->
+                <section class="subpanel subpanel-ingresos">
+                    <div class="panel-header panel-header--sub">
+                        <div class="panel-header__titles">
+                            <h2>Ingresos</h2>
+                            <span class="panel-tag panel-tag--ingreso">Entrada</span>
+                        </div>
+                        <button type="button"
+                                class="icon-btn icon-btn--ingreso"
+                                id="openIngresoForm">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- FORMULARIO INGRESO (INICIALMENTE ESCONDIDO) -->
+                    <form id="ingresoForm" class="form-grid is-hidden">
+                        <input type="hidden" id="ingresoId" />
+                        <input type="hidden" id="ingresoAttachment" />
+
+                        <label class="field">
+                            <span>Descripción</span>
+                            <input type="text" id="ingresoDescripcion"
+                                   placeholder="Ej: salario, freelance..." required />
+                        </label>
+
+                        <label class="field">
+                            <span>Monto (€)</span>
+                            <input type="number" id="ingresoMonto"
+                                   placeholder="0.00" step="0.01" required />
+                        </label>
+
+                        <label class="field">
+                            <span>Fecha</span>
+                            <input type="date" id="ingresoFecha" required />
+                        </label>
+
+                        <label class="field">
+                            <span>Categoría</span>
+                            <select id="ingresoCategoria">
+                                <option value="SALARIO">Salario</option>
+                                <option value="FREELANCE">Freelance</option>
+                                <option value="INVERSIONES">Inversiones</option>
+                                <option value="REEMBOLSOS">Reembolsos</option>
+                                <option value="OTROS">Otros</option>
+                            </select>
+                        </label>
+
+                        <!-- BLOCO DE ADJUNTO (INGRESOS) -->
+                        <div class="field field-attachment">
+                            <span>Adjunto</span>
+                            <div class="attachment-actions" data-context="ingreso">
+                                <button type="button"
+                                        id="btnAdjuntarIngreso"
+                                        class="btn btn-outline-attachment">
+                                    Adjuntar archivo
+                                </button>
+                                <button type="button"
+                                        id="btnVerAdjuntoIngreso"
+                                        class="btn btn-outline-attachment is-hidden">
+                                    Ver adjunto
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-income">
+                            Guardar ingreso
+                        </button>
+                    </form>
+
+                    <div class="total total--ingresos">
+                        Total ingresos: <span id="totalIngresos" data-total="0">0 €</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table id="ingresosTable">
+                            <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="ingresosList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GASTOS -->
+                <section class="subpanel subpanel-gastos">
+                    <div class="panel-header panel-header--sub">
+                        <div class="panel-header__titles">
+                            <h2>Gastos</h2>
+                            <span class="panel-tag panel-tag--gasto">Salida</span>
+                        </div>
+                        <button type="button"
+                                class="icon-btn icon-btn--gasto"
+                                id="openGastoForm">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- FORMULARIO GASTO (INICIALMENTE ESCONDIDO) -->
+                    <form id="gastoForm" class="form-grid is-hidden">
+                        <input type="hidden" id="gastoId" />
+                        <input type="hidden" id="gastoAttachment" />
+
+                        <label class="field">
+                            <span>Descripción</span>
+                            <input type="text" id="gastoDescripcion"
+                                   placeholder="Ej: alquiler, comida..." required />
+                        </label>
+
+                        <label class="field">
+                            <span>Monto (€)</span>
+                            <input type="number" id="gastoMonto"
+                                   placeholder="0.00" step="0.01" required />
+                        </label>
+
+                        <label class="field">
+                            <span>Fecha</span>
+                            <input type="date" id="gastoFecha" required />
+                        </label>
+
+                        <label class="field">
+                            <span>Categoría</span>
+                            <select id="gastoCategoria">
+                                <option value="ALIMENTACION">Alimentación</option>
+                                <option value="TRANSPORTE">Transporte</option>
+                                <option value="VIVIENDA">Vivienda</option>
+                                <option value="OCIO">Ocio</option>
+                                <option value="OTROS">Otros</option>
+                            </select>
+                        </label>
+
+                        <!-- BLOCO DE ADJUNTO (GASTOS) -->
+                        <div class="field field-attachment">
+                            <span>Adjunto</span>
+                            <div class="attachment-actions" data-context="gasto">
+                                <button type="button"
+                                        id="btnAdjuntarGasto"
+                                        class="btn btn-outline-attachment">
+                                    Adjuntar archivo
+                                </button>
+                                <button type="button"
+                                        id="btnVerAdjuntoGasto"
+                                        class="btn btn-outline-attachment is-hidden">
+                                    Ver adjunto
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-expense">
+                            Guardar gasto
+                        </button>
+                    </form>
+
+                    <div class="total total--gastos">
+                        Total gastos: <span id="totalGastos" data-total="0">0 €</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table id="gastosTable">
+                            <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="gastosList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- DRAWER LATERAL: ÚLTIMOS MOVIMIENTOS -->
+<aside id="drawerMovimientos" class="drawer">
+    <div class="drawer__overlay"></div>
+    <div class="drawer__panel">
+        <header class="drawer__header">
+            <h2>Últimos movimientos</h2>
+            <button type="button" id="drawerClose" class="icon-btn icon-btn--close">
+                ×
+            </button>
+        </header>
+        <div class="drawer__content">
+            <div class="ultimos-list" id="ultimosMovimientos">
+                <!-- Rellenado dinámicamente por app.js -->
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- MODAL DE ADJUNTOS (VISUALIZAR / ELIMINAR) -->
+<div id="attachmentModal" class="modal is-hidden">
+    <div class="modal__backdrop"></div>
+    <div class="modal__panel">
+        <header class="modal__header">
+            <h3>Adjunto</h3>
+            <button type="button" id="closeAttachmentModal" class="icon-btn icon-btn--close">
+                ×
+            </button>
+        </header>
+        <div class="modal__content">
+            <div id="attachmentPreview">
+                <!-- Preview dinámico (imagen o link) -->
+            </div>
+        </div>
+        <footer class="modal__footer">
+            <button type="button" id="btnEliminarAdjunto" class="btn btn-danger">
+                Eliminar adjunto 🗑️
+            </button>
+        </footer>
+    </div>
+</div>
+
+<!-- INPUT DE ARQUIVO GLOBAL (OCULTO) -->
+<input
+        type="file"
+        id="fileInput"
+        style="display:none"
+        accept=".pdf,image/*" />
+
 </body>
 </html>
