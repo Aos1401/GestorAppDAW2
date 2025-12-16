@@ -63,3 +63,8 @@ replay_pid*
 # Keep code styles and run configs
 !.idea/codeStyles
 !.idea/runConfigurations
+
+# --- SECRETOS Y CONFIGURACIÓN ---
+# Ignorar el archivo con contraseñas
+application.properties
+src/main/resources/application.properties

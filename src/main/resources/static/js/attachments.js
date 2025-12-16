@@ -1,226 +1,180 @@
-// input de arquivo global
+console.log("--> CARGANDO ATTACHMENTS.JS (MODO DEBUG)");
+
 const fileInput = document.getElementById("fileInput");
+let uploadMeta = { tipo: null, id: null, context: null };
 
-// modal
-const attachmentModal = $("#attachmentModal");
-const closeAttachmentModal = $("#closeAttachmentModal");
-const attachmentPreview = $("#attachmentPreview");
-const btnEliminarAdjunto = $("#btnEliminarAdjunto");
-const modalBackdrop = attachmentModal
-  ? attachmentModal.querySelector(".modal__backdrop")
-  : null;
+// 1. COMPROBAR SI LOS BOTONES EXISTEN EN EL HTML
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("--> Verificando botones en el HTML...");
 
-// contexto do adjunto aberto no modal
-let currentAttachmentContext = null; // { tipo, id, origin }
+    const btnVerIngreso = document.getElementById("btnVerAdjuntoIngreso");
+    const btnVerGasto = document.getElementById("btnVerAdjuntoGasto");
 
-// botões de adjunto dos formulários
-const btnAdjuntarIngreso = $("#btnAdjuntarIngreso");
-const btnVerAdjuntoIngreso = $("#btnVerAdjuntoIngreso");
-const btnAdjuntarGasto = $("#btnAdjuntarGasto");
-const btnVerAdjuntoGasto = $("#btnVerAdjuntoGasto");
+    if (!btnVerIngreso) console.error("❌ ERROR CRÍTICO: No encuentro el botón 'btnVerAdjuntoIngreso' en el HTML.");
+    else console.log("✅ Botón 'btnVerAdjuntoIngreso' encontrado (estado oculto: " + btnVerIngreso.classList.contains("is-hidden") + ")");
 
-// --------- ESTADO INICIAL DOS BOTÕES ---------
-if (btnAdjuntarIngreso && btnVerAdjuntoIngreso) {
-  btnAdjuntarIngreso.classList.remove("is-hidden");
-  btnVerAdjuntoIngreso.classList.add("is-hidden");
-}
-if (btnAdjuntarGasto && btnVerAdjuntoGasto) {
-  btnAdjuntarGasto.classList.remove("is-hidden");
-  btnVerAdjuntoGasto.classList.add("is-hidden");
-}
+    if (!btnVerGasto) console.error("❌ ERROR CRÍTICO: No encuentro el botón 'btnVerAdjuntoGasto' en el HTML.");
+    else console.log("✅ Botón 'btnVerAdjuntoGasto' encontrado.");
+});
 
-// --------- MODAL ---------
-function abrirModalAdjunto(tipo, id, origin) {
-  if (!attachmentModal || !attachmentPreview) return;
+// 2. CONFIGURAR CLICK EN LOS CLIPS
+["ingreso", "gasto"].forEach(ctx => {
+    const capitalized = ctx.charAt(0).toUpperCase() + ctx.slice(1);
 
-  currentAttachmentContext = { tipo, id, origin };
-  const url = `/api/files/${tipo}/${id}`;
+    const btnAdd = document.getElementById(`btnAdjuntar${capitalized}`);
+    const btnVer = document.getElementById(`btnVerAdjunto${capitalized}`);
 
-  // limpa conteúdo anterior
-  attachmentPreview.innerHTML = "";
+    // Click en "Adjuntar"
+    if (btnAdd) {
+        btnAdd.addEventListener("click", () => {
+            const inputId = document.getElementById(`${ctx}Id`);
+            const id = inputId ? inputId.value : null;
 
-  // tenta mostrar como imagem primeiro
-  const img = document.createElement("img");
-  img.src = url;
-  img.alt = "Adjunto";
-  img.style.maxWidth = "100%";
-  img.style.borderRadius = "8px";
-  img.style.display = "block";
-  img.style.marginBottom = "8px";
+            console.log(`--> Click en Adjuntar ${capitalized}. ID detectado: ${id}`);
 
-  // se der erro (não é imagem ou backend errado), cai pro link simples
-  img.onerror = () => {
-    attachmentPreview.innerHTML = `
-      <p>Haz clic en el enlace para ver el archivo adjunto:</p>
-      <a href="${url}" target="_blank" rel="noopener noreferrer">Abrir adjunto</a>
-    `;
-  };
+            if (!id) {
+                alert("Primero guarda el movimiento.");
+                return;
+            }
 
-  attachmentPreview.appendChild(img);
-  attachmentModal.classList.remove("is-hidden");
-}
+            // Guardamos el contexto
+            uploadMeta = { tipo: `${ctx}s`, id: id, context: ctx };
+            console.log("--> Meta guardado:", uploadMeta);
 
-
-function cerrarModalAdjunto() {
-  if (!attachmentModal) return;
-  attachmentModal.classList.add("is-hidden");
-  currentAttachmentContext = null;
-}
-
-if (closeAttachmentModal) {
-  closeAttachmentModal.addEventListener("click", cerrarModalAdjunto);
-}
-if (modalBackdrop) {
-  modalBackdrop.addEventListener("click", cerrarModalAdjunto);
-}
-
-// --------- BOTÕES DOS FORMULÁRIOS ---------
-if (btnAdjuntarIngreso) {
-  btnAdjuntarIngreso.addEventListener("click", () => {
-    const id = $("#ingresoId").value;
-    if (!id) {
-      alert("Primero guarda el ingreso antes de adjuntar un archivo.");
-      return;
+            fileInput.click();
+        });
     }
-    abrirUpload("ingresos", id, "formIngreso");
-  });
-}
 
-if (btnVerAdjuntoIngreso) {
-  btnVerAdjuntoIngreso.addEventListener("click", () => {
-    const id = $("#ingresoId").value;
-    if (!id) {
-      alert("No hay ingreso seleccionado.");
-      return;
+    // Click en "Ver"
+    if (btnVer) {
+        btnVer.addEventListener("click", () => {
+            const inputId = document.getElementById(`${ctx}Id`);
+            const id = inputId ? inputId.value : null;
+            if (id) abrirModalAdjunto(`${ctx}s`, id);
+        });
     }
-    abrirModalAdjunto("ingresos", id, "formIngreso");
-  });
-}
+});
 
-if (btnAdjuntarGasto) {
-  btnAdjuntarGasto.addEventListener("click", () => {
-    const id = $("#gastoId").value;
-    if (!id) {
-      alert("Primero guarda el gasto antes de adjuntar un archivo.");
-      return;
-    }
-    abrirUpload("gastos", id, "formGasto");
-  });
-}
-
-if (btnVerAdjuntoGasto) {
-  btnVerAdjuntoGasto.addEventListener("click", () => {
-    const id = $("#gastoId").value;
-    if (!id) {
-      alert("No hay gasto seleccionado.");
-      return;
-    }
-    abrirModalAdjunto("gastos", id, "formGasto");
-  });
-}
-
-// --------- ELIMINAR ADJUNTO DESDE O MODAL ---------
-if (btnEliminarAdjunto) {
-  btnEliminarAdjunto.addEventListener("click", async () => {
-    if (!currentAttachmentContext) return;
-
-    const confirmed = confirm(
-      "¿Seguro que quieres eliminar el archivo adjunto?"
-    );
-    if (!confirmed) return;
-
-    const { tipo, id, origin } = currentAttachmentContext;
-
-    try {
-      const resp = await fetch(`/api/files/${tipo}/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!resp.ok) {
-        throw new Error("Error al eliminar el archivo");
-      }
-
-      if (origin === "formIngreso") {
-        if (btnVerAdjuntoIngreso) btnVerAdjuntoIngreso.classList.add("is-hidden");
-        if (btnAdjuntarIngreso) btnAdjuntarIngreso.classList.remove("is-hidden");
-        const hidden = $("#ingresoAttachment");
-        if (hidden) hidden.value = "";
-      } else if (origin === "formGasto") {
-        if (btnVerAdjuntoGasto) btnVerAdjuntoGasto.classList.add("is-hidden");
-        if (btnAdjuntarGasto) btnAdjuntarGasto.classList.remove("is-hidden");
-        const hidden = $("#gastoAttachment");
-        if (hidden) hidden.value = "";
-      }
-
-      cerrarModalAdjunto();
-      alert("Adjunto eliminado correctamente ✅");
-    } catch (err) {
-      console.error(err);
-      alert("No se pudo eliminar el adjunto ❌");
-    }
-  });
-}
-
-// --------- UPLOAD (INPUT OCULTO) ---------
+// 3. EVENTO DE SUBIDA (AQUÍ ESTÁ LA CLAVE)
 if (fileInput) {
-  fileInput.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
+    fileInput.addEventListener("change", async (e) => {
+        console.log("--> Archivo seleccionado. Iniciando subida...");
 
-    if (!file || !uploadMeta.id || !uploadMeta.tipo) {
-      uploadMeta = { tipo: null, id: null, origin: null };
-      fileInput.value = "";
-      return;
+        const file = e.target.files[0];
+        if (!file || !uploadMeta.id) {
+            console.error("❌ Cancelado: No hay archivo o no hay ID.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const url = `${API_FILES}/${uploadMeta.tipo}/${uploadMeta.id}`;
+            console.log("--> Enviando a:", url);
+
+            const resp = await fetch(url, { method: "POST", body: formData });
+
+            if (!resp.ok) throw new Error("Error en la petición fetch");
+
+            console.log("✅ Subida exitosa. Intentando mostrar botón...");
+            alert("Archivo subido. Mira si aparece el botón 'Ver adjunto'.");
+
+            // INTENTO FORZAR LA VISIBILIDAD
+            alternarBotones(uploadMeta.context, true);
+
+        } catch (error) {
+            console.error("❌ ERROR AL SUBIR:", error);
+            alert("Error al subir el archivo.");
+        } finally {
+            fileInput.value = "";
+        }
+    });
+}
+
+// 4. FUNCIÓN PARA CAMBIAR BOTONES
+function alternarBotones(ctx, tieneArchivo) {
+    console.log(`--> Ejecutando alternarBotones para contexto: '${ctx}', tieneArchivo: ${tieneArchivo}`);
+
+    const capitalized = ctx.charAt(0).toUpperCase() + ctx.slice(1);
+    const btnAdd = document.getElementById(`btnAdjuntar${capitalized}`);
+    const btnVer = document.getElementById(`btnVerAdjunto${capitalized}`);
+
+    if (!btnAdd || !btnVer) {
+        console.error(`❌ ERROR: No encuentro los botones para ${ctx}`);
+        return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    if (tieneArchivo) {
+        console.log(`--> Ocultando ${btnAdd.id}, Mostrando ${btnVer.id}`);
+        btnAdd.classList.add("is-hidden");
+        btnVer.classList.remove("is-hidden");
+    } else {
+        console.log(`--> Mostrando ${btnAdd.id}, Ocultando ${btnVer.id}`);
+        btnAdd.classList.remove("is-hidden");
+        btnVer.classList.add("is-hidden");
+    }
+}
+
+// 5. VERIFICACIÓN AL EDITAR
+window.verificarAdjunto = async (tipoPlural, id, ctxSingular) => {
+    console.log(`--> Verificando adjunto existente para ${tipoPlural}/${id}`);
+
+    // Reset inicial
+    alternarBotones(ctxSingular, false);
 
     try {
-      const resp = await fetch(
-        `/api/files/${uploadMeta.tipo}/${uploadMeta.id}`,
-        {
-          method: "POST",
-          body: formData,
+        const resp = await fetch(`${API_FILES}/${tipoPlural}/${id}`, { method: "HEAD" });
+        if (resp.ok) {
+            console.log("✅ Archivo existente detectado. Mostrando botón.");
+            alternarBotones(ctxSingular, true);
+        } else {
+            console.log("ℹ️ No hay archivo previo.");
         }
-      );
-
-      if (!resp.ok) {
-        throw new Error("Error al subir el archivo");
-      }
-
-      alert("Archivo adjuntado correctamente ✅");
-
-      if (uploadMeta.origin === "formIngreso") {
-        if (btnAdjuntarIngreso)
-          btnAdjuntarIngreso.classList.add("is-hidden");
-        if (btnVerAdjuntoIngreso)
-          btnVerAdjuntoIngreso.classList.remove("is-hidden");
-        const hidden = $("#ingresoAttachment");
-        if (hidden) hidden.value = "hasAttachment";
-      } else if (uploadMeta.origin === "formGasto") {
-        if (btnAdjuntarGasto)
-          btnAdjuntarGasto.classList.add("is-hidden");
-        if (btnVerAdjuntoGasto)
-          btnVerAdjuntoGasto.classList.remove("is-hidden");
-        const hidden = $("#gastoAttachment");
-        if (hidden) hidden.value = "hasAttachment";
-      }
-    } catch (err) {
-      console.error(err);
-      alert("No se pudo adjuntar el archivo ❌");
-    } finally {
-      uploadMeta = { tipo: null, id: null, origin: null };
-      fileInput.value = "";
+    } catch (e) {
+        console.error("Error verificando adjunto", e);
     }
-  });
+};
+
+// 6. MODAL (Igual que antes pero con logs)
+const attachmentModal = document.getElementById("attachmentModal");
+const attachmentPreview = document.getElementById("attachmentPreview");
+
+function abrirModalAdjunto(tipo, id) {
+    console.log(`--> Abriendo modal para ${tipo}/${id}`);
+    if (!attachmentModal) return;
+
+    const timestamp = new Date().getTime();
+    const url = `${API_FILES}/${tipo}/${id}?t=${timestamp}`;
+
+    attachmentPreview.innerHTML = `
+        <h4 style="margin-top:0; margin-bottom:15px; text-align:center;">Archivo Adjunto</h4>
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${url}"
+                 style="max-width: 100%; max-height: 300px; border-radius: 8px;"
+                 onerror="this.style.display='none'; document.getElementById('msg-error').style.display='block';"
+            />
+            <p id="msg-error" style="display:none; color:red;">No se puede previsualizar (PDF o error)</p>
+        </div>
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <a href="${url}" target="_blank" class="btn btn-outline">Abrir / Descargar</a>
+            <button class="btn btn-danger" onclick="eliminarAdjunto('${tipo}', ${id})">Eliminar</button>
+        </div>
+    `;
+    attachmentModal.classList.remove("is-hidden");
 }
 
-// chamado pelos botões "Adjuntar archivo"
-function abrirUpload(tipo, id, origin = null) {
-  if (!fileInput) {
-    console.error("No se encontró el input de archivo oculto (#fileInput)");
-    return;
-  }
-  uploadMeta = { tipo, id, origin };
-  fileInput.click();
-}
+window.eliminarAdjunto = async (tipo, id) => {
+    if(!confirm("¿Borrar archivo?")) return;
+    try {
+        await fetch(`${API_FILES}/${tipo}/${id}`, { method: "DELETE" });
+        alert("Eliminado");
+        attachmentModal.classList.add("is-hidden");
+        const ctx = tipo.slice(0, -1);
+        alternarBotones(ctx, false);
+    } catch(e) { console.error(e); }
+};
+
+document.getElementById("closeAttachmentModal")?.addEventListener("click", () => {
+    attachmentModal.classList.add("is-hidden");
+});

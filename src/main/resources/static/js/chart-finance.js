@@ -1,53 +1,72 @@
+// Variable global para el gráfico (Chart.js)
+let grafico = null;
+
 function actualizarResumen(totalIngresos, totalGastos) {
-  $("#totalIngresosResumen").textContent = `${fmt(totalIngresos)} €`;
-  $("#totalGastosResumen").textContent = `${fmt(totalGastos)} €`;
-  $("#saldoActual").textContent = `${fmt(totalIngresos - totalGastos)} €`;
-  actualizarGrafico(totalIngresos, totalGastos);
+    // 1. Actualizar las tarjetas de números
+    const lblIng = $("#totalIngresosResumen");
+    const lblGas = $("#totalGastosResumen");
+    const lblSaldo = $("#saldoActual");
+
+    if (lblIng) lblIng.textContent = `${fmt(totalIngresos)} €`;
+    if (lblGas) lblGas.textContent = `${fmt(totalGastos)} €`;
+    
+    if (lblSaldo) {
+        const saldo = totalIngresos - totalGastos;
+        lblSaldo.textContent = `${fmt(saldo)} €`;
+        // Poner en rojo si es negativo
+        lblSaldo.style.color = saldo < 0 ? "#e11d48" : "inherit";
+    }
+
+    // 2. Actualizar el gráfico
+    actualizarGrafico(totalIngresos, totalGastos);
 }
 
 function actualizarGrafico(totalIngresos, totalGastos) {
-  const ctx = document.getElementById("graficoFinanzas");
-  if (!ctx) return;
+    const ctx = document.getElementById("graficoFinanzas");
+    if (!ctx) return;
 
-  const data = {
-    labels: ["Ingresos", "Gastos"],
-    datasets: [
-      {
-        data: [totalIngresos, totalGastos],
-        // cores chapadas, sem borda escura
-        backgroundColor: ["#3B82F6", "#F97316"], // azul ingressos, laranja gastos
-        borderWidth: 0,          // SEM borda
-        hoverBorderWidth: 0,
-        hoverOffset: 6           // só um efeito leve ao passar o mouse
-      },
-    ],
-  };
+    // Si no hay datos, mostramos un gráfico vacío o ceros
+    const datos = [totalIngresos, totalGastos];
+    
+    const data = {
+        labels: ["Ingresos", "Gastos"],
+        datasets: [
+            {
+                data: datos,
+                backgroundColor: ["#3B82F6", "#F97316"], // Azul e Ingreso
+                borderWidth: 0,
+                hoverOffset: 4
+            },
+        ],
+    };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 1, // força formato mais redondinho
-    layout: {
-      padding: 4,
-    },
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-          pointStyle: "rectRounded", // caixinha clean
-          boxWidth: 14,
-          boxHeight: 8,
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 10
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: (context) => ` ${context.label}: ${fmt(context.raw)} €`
+                }
+            }
         },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => `${context.label}: ${fmt(context.parsed)} €`,
-        },
-      },
-    },
-  };
+    };
 
-  if (grafico) grafico.destroy();
-  grafico = new Chart(ctx, { type: "pie", data, options });
+    // Si ya existe un gráfico previo, lo destruimos para crear el nuevo
+    if (grafico) {
+        grafico.destroy();
+    }
+
+    grafico = new Chart(ctx, {
+        type: "doughnut", // O "pie" si prefieres pastel completo
+        data: data,
+        options: options,
+    });
 }

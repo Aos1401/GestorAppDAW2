@@ -17,8 +17,8 @@ public class ConsultarGastoController {
         this.consultarGastosService = consultarGastosService;
     }
 
-    @GetMapping
-    public List<Gasto> listar() {
-        return consultarGastosService.listarGastos();
+    @GetMapping("/{usuarioId}")
+    public List<Gasto> listar(@PathVariable Long usuarioId) {
+        return consultarGastosService.listarGastosPorUsuario(usuarioId);
     }
 }

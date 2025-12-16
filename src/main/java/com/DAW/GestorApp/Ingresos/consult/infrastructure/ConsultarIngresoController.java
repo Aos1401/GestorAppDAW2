@@ -17,8 +17,9 @@ public class ConsultarIngresoController {
         this.consultarIngresosService = consultarIngresosService;
     }
 
-    @GetMapping
-    public List<Ingreso> listar() {
-        return consultarIngresosService.listarIngresos();
+
+    @GetMapping("/{usuarioId}")
+    public List<Ingreso> listar(@PathVariable Long usuarioId) {
+        return consultarIngresosService.listarIngresosPorUsuario(usuarioId);
     }
 }

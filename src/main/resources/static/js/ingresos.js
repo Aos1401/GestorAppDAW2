@@ -1,92 +1,93 @@
 const ingresoForm = $("#ingresoForm");
 const openIngresoFormBtn = $("#openIngresoForm");
 
-if (openIngresoFormBtn && ingresoForm) {
-  openIngresoFormBtn.addEventListener("click", () => {
-    ingresoForm.classList.toggle("is-hidden");
-  });
+if (openIngresoFormBtn) {
+    openIngresoFormBtn.addEventListener("click", () => {
+        ingresoForm.classList.toggle("is-hidden");
+    });
 }
 
 async function listarIngresos() {
-  try {
-    const res = await fetch(API_INGRESOS);
-    const ingresos = await res.json();
+    const userId = getUsuarioId();
+    if (!userId) return;
 
-    ingresosCache = ingresos; // usado no drawer
+    try {
+        const res = await fetch(`${API_INGRESOS}/${userId}`);
+        if (!res.ok) throw new Error("Error fetching ingresos");
 
-    const list = $("#ingresosList");
-    list.innerHTML = "";
-    let total = 0;
+        const data = await res.json();
+        ingresosCache = data;
 
-    ingresos.forEach((ingreso) => {
-      total += ingreso.monto;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${ingreso.descripcion}</td>
-        <td>${fmt(ingreso.monto)}</td>
-        <td>${ingreso.fecha}</td>
-        <td>${ingreso.categoria}</td>
-        <td>
-          <button class="editBtn">Editar</button>
-          <button class="delBtn">Eliminar</button>
-        </td>
-      `;
-      tr.querySelector(".editBtn").onclick = () => cargarIngreso(ingreso);
-      tr.querySelector(".delBtn").onclick = async () => {
-        if (confirm("¿Seguro que quieres eliminar este ingreso?")) {
-          await fetch(`${API_INGRESOS}/${ingreso.id}`, { method: "DELETE" });
-          listarIngresos();
-          listarGastos();
-        }
-      };
+        const list = $("#ingresosList");
+        list.innerHTML = "";
+        let total = 0;
 
-      list.appendChild(tr);
-    });
+        data.forEach(i => {
+            total += i.monto;
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i.descripcion}</td>
+                <td>${fmt(i.monto)}</td>
+                <td>${i.fecha}</td>
+                <td>${i.categoria}</td>
+                <td>
+                    <button class="btn btn-outline-attachment" onclick='cargarIngreso(${JSON.stringify(i)})'>✏️</button>
+                    <button class="btn btn-danger" style="padding: 0.3rem 0.6rem;" onclick='borrarIngreso(${i.id})'>🗑️</button>
+                </td>
+            `;
+            list.appendChild(tr);
+        });
 
-    $("#totalIngresos").textContent = `Total Ingresos: ${fmt(total)} €`;
-    $("#totalIngresos").dataset.total = total;
+        $("#totalIngresos").textContent = `Total: ${fmt(total)} €`;
+        $("#totalIngresos").dataset.total = total;
 
-    const totalGastos = parseFloat($("#totalGastos").dataset.total || 0);
-    actualizarResumen(total, totalGastos);
+        const tGas = parseFloat($("#totalGastos")?.dataset.total || 0);
+        actualizarResumen(total, tGas);
 
-    actualizarUltimosMovimientos();
-  } catch (error) {
-    console.error(error);
-  }
+    } catch (e) { console.error(e); }
 }
 
-function cargarIngreso(ingreso) {
-  if (ingresoForm) ingresoForm.classList.remove("is-hidden");
-  $("#ingresoForm button").textContent = "Actualizar Ingreso";
-  $("#ingresoId").value = ingreso.id;
-  $("#ingresoDescripcion").value = ingreso.descripcion;
-  $("#ingresoMonto").value = ingreso.monto;
-  $("#ingresoFecha").value = ingreso.fecha;
-  $("#ingresoCategoria").value = ingreso.categoria;
-}
+window.cargarIngreso = (i) => {
+    if (ingresoForm) ingresoForm.classList.remove("is-hidden");
+    $("#ingresoId").value = i.id;
+    $("#ingresoDescripcion").value = i.descripcion;
+    $("#ingresoMonto").value = i.monto;
+    $("#ingresoFecha").value = i.fecha;
+    $("#ingresoCategoria").value = i.categoria;
+    $("#ingresoForm button").textContent = "Actualizar";
+};
+
+window.borrarIngreso = async (id) => {
+    if(!confirm("¿Eliminar?")) return;
+    await fetch(`${API_INGRESOS}/${id}`, { method: "DELETE" });
+    listarIngresos();
+};
 
 if (ingresoForm) {
-  ingresoForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const id = $("#ingresoId").value;
-    const data = {
-      descripcion: $("#ingresoDescripcion").value,
-      monto: parseFloat($("#ingresoMonto").value),
-      fecha: $("#ingresoFecha").value,
-      categoria: $("#ingresoCategoria").value,
-    };
-    const method = id ? "PUT" : "POST";
-    const url = id ? `${API_INGRESOS}/${id}` : API_INGRESOS;
+    ingresoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userId = getUsuarioId();
+        const id = $("#ingresoId").value;
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+        const body = {
+            descripcion: $("#ingresoDescripcion").value,
+            monto: parseFloat($("#ingresoMonto").value),
+            fecha: $("#ingresoFecha").value,
+            categoria: $("#ingresoCategoria").value
+        };
+
+        const url = id ? `${API_INGRESOS}/${id}` : `${API_INGRESOS}/${userId}`;
+        const method = id ? "PUT" : "POST";
+
+        await fetch(url, {
+            method,
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(body)
+        });
+
+        ingresoForm.reset();
+        $("#ingresoId").value = "";
+        $("#ingresoForm button").textContent = "Guardar";
+        listarIngresos();
     });
-
-    ingresoForm.reset();
-    $("#ingresoId").value = "";
-    $("#ingresoForm button").textContent = "Guardar Ingreso";
-    listarIngresos();
-  });
 }

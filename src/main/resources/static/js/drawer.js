@@ -1,88 +1,72 @@
-// elementos do drawer
+// Elementos del drawer
 const drawer = document.getElementById("drawerMovimientos");
 const btnUltimos = document.getElementById("btnUltimos");
 const drawerClose = document.getElementById("drawerClose");
 const drawerOverlay = drawer ? drawer.querySelector(".drawer__overlay") : null;
 
-function abrirDrawer() {
-  if (!drawer) return;
-  drawer.classList.add("drawer--open");
-}
-
-function cerrarDrawer() {
-  if (!drawer) return;
-  drawer.classList.remove("drawer--open");
-}
-
+// Abrir Drawer
 if (btnUltimos) {
-  btnUltimos.addEventListener("click", () => {
-    actualizarUltimosMovimientos();
-    abrirDrawer();
-  });
+    btnUltimos.addEventListener("click", () => {
+        actualizarUltimosMovimientos();
+        if (drawer) drawer.classList.add("drawer--open");
+    });
 }
 
-if (drawerClose) {
-  drawerClose.addEventListener("click", cerrarDrawer);
+// Cerrar Drawer
+function cerrarDrawer() {
+    if (drawer) drawer.classList.remove("drawer--open");
 }
 
-if (drawerOverlay) {
-  drawerOverlay.addEventListener("click", cerrarDrawer);
-}
+if (drawerClose) drawerClose.addEventListener("click", cerrarDrawer);
+if (drawerOverlay) drawerOverlay.addEventListener("click", cerrarDrawer);
 
-// monta a listinha dos últimos movimentos (5 mais recentes)
+// Lógica para combinar y ordenar las listas de cache
 function actualizarUltimosMovimientos() {
-  const cont = document.getElementById("ultimosMovimientos");
-  if (!cont) return;
+    const cont = document.getElementById("ultimosMovimientos");
+    if (!cont) return;
 
-  const combinados = [
-    ...ingresosCache.map((i) => ({
-      tipo: "Ingreso",
-      descripcion: i.descripcion,
-      monto: i.monto,
-      fecha: i.fecha,
-      categoria: i.categoria,
-    })),
-    ...gastosCache.map((g) => ({
-      tipo: "Gasto",
-      descripcion: g.descripcion,
-      monto: g.monto,
-      fecha: g.fecha,
-      categoria: g.categoria,
-    })),
-  ];
+    // Combinamos los arrays globales (definidos en config.js)
+    const combinados = [
+        ...ingresosCache.map((i) => ({ ...i, tipo: "Ingreso" })),
+        ...gastosCache.map((g) => ({ ...g, tipo: "Gasto" })),
+    ];
 
-  combinados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-  const top5 = combinados.slice(0, 5);
+    // Ordenar por fecha (más reciente primero)
+    combinados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-  cont.innerHTML = "";
+    // Coger solo los 10 primeros
+    const top10 = combinados.slice(0, 10);
 
-  if (top5.length === 0) {
-    cont.innerHTML = `<p class="ultimos-empty">Todavía no hay movimientos registrados.</p>`;
-    return;
-  }
+    cont.innerHTML = "";
 
-  top5.forEach((mov) => {
-    const item = document.createElement("div");
-    item.className = "ultimos-item";
-    item.innerHTML = `
-      <div class="ultimos-item__header">
-        <span class="ultimos-tipo ultimos-tipo--${
-          mov.tipo === "Ingreso" ? "ingreso" : "gasto"
-        }">
-          ${mov.tipo}
-        </span>
-        <span class="ultimos-monto">
-          ${mov.tipo === "Ingreso" ? "+" : "-"} ${fmt(mov.monto)} €
-        </span>
-      </div>
-      <div class="ultimos-item__body">
-        <span class="ultimos-desc">${mov.descripcion || "Sin descripción"}</span>
-      </div>
-      <div class="ultimos-item__meta">
-        <span>${mov.fecha || ""}</span>
-        <span>${mov.categoria || ""}</span>
-      </div>
-    `;
-    cont.appendChild(item);
-  });
+    if (top10.length === 0) {
+        cont.innerHTML = `<p style="text-align:center; opacity:0.6;">No hay movimientos aún.</p>`;
+        return;
+    }
+
+    top10.forEach((mov) => {
+        const esIngreso = mov.tipo === "Ingreso";
+        const signo = esIngreso ? "+" : "-";
+        const claseColor = esIngreso ? "text-blue-600" : "text-orange-600"; // Clases ejemplo o estilos inline
+
+        const item = document.createElement("div");
+        item.className = "ultimos-item"; // Asegúrate de tener CSS para esto o usa estilos simples
+        item.style.padding = "10px";
+        item.style.borderBottom = "1px solid #eee";
+
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; font-weight:500;">
+                <span>${mov.tipo}</span>
+                <span style="${esIngreso ? 'color:#2563eb' : 'color:#ea580c'}">
+                    ${signo} ${fmt(mov.monto)} €
+                </span>
+            </div>
+            <div style="font-size:0.9em; color:#555;">${mov.descripcion}</div>
+            <div style="font-size:0.8em; color:#999; display:flex; justify-content:space-between; margin-top:4px;">
+                <span>${mov.fecha}</span>
+                <span>${mov.categoria}</span>
+            </div>
+        `;
+        cont.appendChild(item);
+    });
 }

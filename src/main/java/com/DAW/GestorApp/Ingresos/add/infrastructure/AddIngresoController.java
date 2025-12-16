@@ -15,8 +15,9 @@ public class AddIngresoController {
         this.addIngresoService = addIngresoService;
     }
 
-    @PostMapping
-    public Ingreso crearIngreso(@RequestBody Ingreso ingreso) {
-        return addIngresoService.guardarIngreso(ingreso);
+
+    @PostMapping("/{usuarioId}")
+    public Ingreso crearIngreso(@RequestBody Ingreso ingreso, @PathVariable Long usuarioId) {
+        return addIngresoService.guardarIngreso(ingreso, usuarioId);
     }
 }

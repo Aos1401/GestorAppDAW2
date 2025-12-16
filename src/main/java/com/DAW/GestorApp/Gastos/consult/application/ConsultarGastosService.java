@@ -13,7 +13,8 @@ public class ConsultarGastosService {
         this.gastoRepository = gastoRepository;
     }
 
-    public List<Gasto> listarGastos() {
-        return gastoRepository.findAll();
+    // Cambiamos findAll() por findByUsuarioId
+    public List<Gasto> listarGastosPorUsuario(Long usuarioId) {
+        return gastoRepository.findByUsuarioId(usuarioId);
     }
 }

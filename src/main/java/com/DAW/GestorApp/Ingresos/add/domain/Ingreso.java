@@ -1,7 +1,8 @@
 package com.DAW.GestorApp.Ingresos.add.domain;
 
-
+import com.DAW.GestorApp.Auth.domain.Usuario;
 import com.DAW.GestorApp.eNum.MovementCategory;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -20,6 +21,12 @@ public class Ingreso {
     @Enumerated(EnumType.STRING)
     private MovementCategory categoria;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    // ESTO EVITA EL ERROR DE SERIALIZACIÓN
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "email"})
+    private Usuario usuario;
+
     // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -35,5 +42,7 @@ public class Ingreso {
 
     public MovementCategory getCategoria() { return categoria; }
     public void setCategoria(MovementCategory categoria) { this.categoria = categoria; }
-}
 
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+}

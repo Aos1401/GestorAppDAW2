@@ -15,8 +15,9 @@ public class AddGastoController {
         this.addGastoService = addGastoService;
     }
 
-    @PostMapping
-    public Gasto crearGasto(@RequestBody Gasto gasto) {
-        return addGastoService.guardarGasto(gasto);
+
+    @PostMapping("/{usuarioId}")
+    public Gasto crearGasto(@RequestBody Gasto gasto, @PathVariable Long usuarioId) {
+        return addGastoService.guardarGasto(gasto, usuarioId);
     }
 }

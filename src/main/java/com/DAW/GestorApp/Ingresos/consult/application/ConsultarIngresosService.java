@@ -7,13 +7,13 @@ import java.util.List;
 
 @Service
 public class ConsultarIngresosService {
-    private final IngresoRepository IngresoRepository;
+    private final IngresoRepository ingresoRepository;
 
-    public ConsultarIngresosService(IngresoRepository IngresoRepository) {
-        this.IngresoRepository = IngresoRepository;
+    public ConsultarIngresosService(IngresoRepository ingresoRepository) {
+        this.ingresoRepository = ingresoRepository;
     }
 
-    public List<Ingreso> listarIngresos() {
-        return IngresoRepository.findAll();
+    public List<Ingreso> listarIngresosPorUsuario(Long usuarioId) {
+        return ingresoRepository.findByUsuarioId(usuarioId);
     }
 }
