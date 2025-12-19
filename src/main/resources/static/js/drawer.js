@@ -1,10 +1,8 @@
-// Elementos del drawer
 const drawer = document.getElementById("drawerMovimientos");
 const btnUltimos = document.getElementById("btnUltimos");
 const drawerClose = document.getElementById("drawerClose");
 const drawerOverlay = drawer ? drawer.querySelector(".drawer__overlay") : null;
 
-// Abrir Drawer
 if (btnUltimos) {
     btnUltimos.addEventListener("click", () => {
         actualizarUltimosMovimientos();
@@ -12,7 +10,6 @@ if (btnUltimos) {
     });
 }
 
-// Cerrar Drawer
 function cerrarDrawer() {
     if (drawer) drawer.classList.remove("drawer--open");
 }
@@ -20,12 +17,10 @@ function cerrarDrawer() {
 if (drawerClose) drawerClose.addEventListener("click", cerrarDrawer);
 if (drawerOverlay) drawerOverlay.addEventListener("click", cerrarDrawer);
 
-// Lógica para combinar y ordenar las listas de cache
 function actualizarUltimosMovimientos() {
     const cont = document.getElementById("ultimosMovimientos");
     if (!cont) return;
 
-    // Combinamos los arrays globales (definidos en config.js)
     const combinados = [
         ...ingresosCache.map((i) => ({ ...i, tipo: "Ingreso" })),
         ...gastosCache.map((g) => ({ ...g, tipo: "Gasto" })),

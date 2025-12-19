@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/files")
 public class UploadFileController {
@@ -21,8 +22,6 @@ public class UploadFileController {
         this.service = service;
     }
 
-    // POST /api/files/ingresos/{id}
-    // POST /api/files/gastos/{id}
     @PostMapping("/{tipo}/{id}")
     public ResponseEntity<?> upload(
             @PathVariable String tipo,
@@ -31,7 +30,6 @@ public class UploadFileController {
     ) {
         try {
             String path = service.saveFile(tipo, id, file);
-            // o front não usa essa string, só precisa do 200
             return ResponseEntity.ok("Archivo guardado en: " + path);
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -40,21 +38,12 @@ public class UploadFileController {
         }
     }
 
-    @PostMapping("/temp")
-    public ResponseEntity<String> uploadTemp(@RequestParam("file") MultipartFile file) {
-        String token = service.saveTempFile(file);
-        return ResponseEntity.ok(token); // devolve o token pro front
-    }
-
-
-    // GET /api/files/ingresos/{id}
-    // GET /api/files/gastos/{id}
     @GetMapping("/{tipo}/{id}")
     public ResponseEntity<Resource> getFile(
             @PathVariable String tipo,
             @PathVariable Long id
     ) {
-        Resource file = service.loadFile(tipo, id); // pega o arquivo em disco
+        Resource file = service.loadFile(tipo, id);
 
         String contentType;
         try {
@@ -62,9 +51,7 @@ public class UploadFileController {
         } catch (IOException e) {
             contentType = null;
         }
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
+        if (contentType == null) contentType = "application/octet-stream";
 
         return ResponseEntity
                 .ok()
@@ -72,14 +59,53 @@ public class UploadFileController {
                 .body(file);
     }
 
-    // DELETE /api/files/ingresos/{id}
-    // DELETE /api/files/gastos/{id}
     @DeleteMapping("/{tipo}/{id}")
     public ResponseEntity<Void> deleteFile(
             @PathVariable String tipo,
             @PathVariable Long id
     ) {
-        service.deleteFile(tipo, id);  // garante que esse método exista no service
+        service.deleteFile(tipo, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/temp")
+    public ResponseEntity<String> uploadTemp(@RequestParam("file") MultipartFile file) {
+        String token = service.saveTempFile(file);
+        return ResponseEntity.ok(token);
+    }
+
+    @GetMapping("/temp/{token}")
+    public ResponseEntity<Resource> getTempFile(@PathVariable String token) {
+        Resource file = service.loadTempFile(token);
+
+        String contentType;
+        try {
+            contentType = Files.probeContentType(file.getFile().toPath());
+        } catch (IOException e) {
+            contentType = null;
+        }
+        if (contentType == null) contentType = "application/octet-stream";
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(file);
+    }
+
+    // borra el temporal si el usuario cancela o cambia
+    @DeleteMapping("/temp/{token}")
+    public ResponseEntity<Void> deleteTempFile(@PathVariable String token) {
+        service.deleteTempFile(token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{tipo}/{id}/attach-temp")
+    public ResponseEntity<Void> attachTemp(
+            @PathVariable String tipo,
+            @PathVariable Long id,
+            @RequestParam("token") String token
+    ) {
+        service.attachTempToMovimiento(token, tipo, id);
+        return ResponseEntity.ok().build();
     }
 }

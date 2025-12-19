@@ -65,6 +65,11 @@ replay_pid*
 !.idea/runConfigurations
 
 # --- SECRETOS Y CONFIGURACIÓN ---
-# Ignorar el archivo con contraseñas
 application.properties
 src/main/resources/application.properties
+
+# --- ARCHIVOS DE BASE DE DATOS ---
+BD_GestionDatos.sql
+
+# --- UPLOADS (ARCHIVOS DE USUARIO) ---
+uploads/

@@ -9,10 +9,13 @@ public interface UploadFileService {
 
     Resource loadFile(String tipo, Long id);
 
+    void deleteFile(String tipo, Long id);
+
     String saveTempFile(MultipartFile file);
 
-    void attachTempToMovimiento(String tempToken, String tipo, Long id);
+    Resource loadTempFile(String token);
 
-    // já existia:
-    void deleteFile(String tipo, Long id);
+    void deleteTempFile(String token);
+
+    void attachTempToMovimiento(String tempToken, String tipo, Long id);
 }

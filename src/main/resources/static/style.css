@@ -1,4 +1,3 @@
-/* ------------ RESET Y BASE ------------ */
 *,
 *::before,
 *::after {
@@ -18,19 +17,16 @@ body {
   height: 100vh;
 }
 
-/* ------------ UTILIDADES (CRUCIALES) ------------ */
 .is-hidden {
   display: none !important;
 }
 
-/* ------------ APP SHELL ------------ */
 .app-shell {
   max-width: 1200px;
   margin: 24px auto;
   padding: 0 16px 32px;
 }
 
-/* ------------ HEADER ------------ */
 .app-header {
   display: flex;
   align-items: center;
@@ -51,7 +47,6 @@ body {
   color: #6b7280;
 }
 
-/* ------------ BOTONES ------------ */
 .btn {
   border: none;
   cursor: pointer;
@@ -80,7 +75,6 @@ body {
   background: #f3f4f6;
 }
 
-/* Botones principales de guardar */
 .btn-income,
 .btn-expense {
   color: #ffffff;
@@ -104,7 +98,7 @@ body {
   background: #ea580c;
 }
 
-/* Botón de Perigo (Eliminar / Salir) */
+/* eliminar / salir */
 .btn-danger {
   background: #ef4444;
   color: #ffffff;
@@ -114,7 +108,6 @@ body {
   background: #dc2626;
 }
 
-/* Botones circulares (+, X) */
 .icon-btn {
   border-radius: 50%;
   border: none;
@@ -145,7 +138,6 @@ body {
   font-size: 1.5rem;
 }
 
-/* --- ESTILO NUEVO PARA EL BOTÓN DE ADJUNTOS --- */
 .btn-outline-attachment {
   background: #ffffff;
   border: 1px solid #d1d5db;
@@ -165,7 +157,6 @@ body {
   border-color: #9ca3af;
 }
 
-/* ------------ LAYOUT PRINCIPAL ------------ */
 .app-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -179,6 +170,7 @@ body {
 }
 
 .panel {
+  min-width: 0;
   background: #ffffff;
   border-radius: 16px;
   padding: 24px;
@@ -210,10 +202,9 @@ body {
 .panel-tag--ingreso { background: #dbeafe; color: #1e40af; }
 .panel-tag--gasto { background: #ffedd5; color: #9a3412; }
 
-/* ------------ RESUMEN ------------ */
 .resumen-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -228,6 +219,8 @@ body {
   padding: 16px;
   border-radius: 12px;
   text-align: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .resumen-card--ingresos { background: #eff6ff; }
@@ -243,12 +236,14 @@ body {
 
 .resumen-value {
   display: block;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
   font-weight: 700;
   color: #0f172a;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-/* Gráfico */
 .panel-chart {
   border-top: 1px solid #e2e8f0;
   padding-top: 20px;
@@ -258,14 +253,9 @@ body {
   font-size: 1rem;
   color: #475569;
 }
-#graficoFinanzas {
-  width: 100% !important;
-  max-width: 300px;
-  height: 300px !important;
-  margin: 0 auto;
-}
 
-/* ------------ COLUMNAS MOVIMIENTOS ------------ */
+
+/* Colunas */
 .movimientos-columns {
   display: grid;
   grid-template-columns: 1fr;
@@ -279,7 +269,7 @@ body {
   background: #fafafa;
 }
 
-/* ------------ FORMULARIOS ------------ */
+/* forms */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -322,7 +312,6 @@ body {
   box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
 }
 
-/* Campo adjunto ocupa todo el ancho */
 .field-attachment {
   grid-column: 1 / -1;
   border-top: 1px dashed #e5e7eb;
@@ -336,7 +325,6 @@ body {
   align-items: center;
 }
 
-/* Botón submit ocupa todo el ancho o se alinea */
 .form-grid button[type="submit"] {
   grid-column: 1 / -1;
   justify-self: center;
@@ -344,7 +332,6 @@ body {
   width: 100%;
 }
 
-/* ------------ TABLAS ------------ */
 .total {
   font-weight: 600;
   margin: 12px 0 8px;
@@ -379,7 +366,6 @@ td {
   color: #334155;
 }
 
-/* ------------ DRAWER (LATERAL) ------------ */
 .drawer {
   position: fixed;
   inset: 0;
@@ -435,7 +421,6 @@ td {
   padding: 20px;
 }
 
-/* ------------ MODAL ------------ */
 .modal {
   position: fixed;
   inset: 0;

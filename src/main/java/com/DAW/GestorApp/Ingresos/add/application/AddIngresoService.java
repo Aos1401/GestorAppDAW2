@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class AddIngresoService {
 
     private final IngresoRepository ingresoRepository;
-    private final UsuarioRepository usuarioRepository; // Necesario para buscar usuario
+    private final UsuarioRepository usuarioRepository;
 
     public AddIngresoService(IngresoRepository ingresoRepository, UsuarioRepository usuarioRepository) {
         this.ingresoRepository = ingresoRepository;
@@ -18,14 +18,9 @@ public class AddIngresoService {
     }
 
     public Ingreso guardarIngreso(Ingreso ingreso, Long usuarioId) {
-        // 1. Verificar usuario
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // 2. Asignar usuario
         ingreso.setUsuario(usuario);
-
-        // 3. Guardar
         return ingresoRepository.save(ingreso);
     }
 }

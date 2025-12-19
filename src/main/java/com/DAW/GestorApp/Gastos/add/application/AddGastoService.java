@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AddGastoService {
     private final GastoRepository gastoRepository;
-    private final UsuarioRepository usuarioRepository; // Necesitamos esto para buscar al usuario
+    private final UsuarioRepository usuarioRepository;
 
     public AddGastoService(GastoRepository gastoRepository, UsuarioRepository usuarioRepository) {
         this.gastoRepository = gastoRepository;
@@ -17,14 +17,9 @@ public class AddGastoService {
     }
 
     public Gasto guardarGasto(Gasto gasto, Long usuarioId) {
-        // 1. Buscamos el usuario por su ID
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // 2. Asignamos el usuario al gasto
         gasto.setUsuario(usuario);
-
-        // 3. Guardamos
         return gastoRepository.save(gasto);
     }
 }

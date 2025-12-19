@@ -1,6 +1,5 @@
-// Verificar sesión al cargar
+
 document.addEventListener("DOMContentLoaded", () => {
-    // Si estamos en app.html y no hay usuario, fuera.
     if (window.location.pathname.includes("app.html")) {
         const userId = getUsuarioId();
         if (!userId) {
@@ -9,13 +8,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         console.log("Usuario ID:", userId);
 
-        // Cargar datos iniciales
         if (typeof listarGastos === "function") listarGastos();
         if (typeof listarIngresos === "function") listarIngresos();
     }
 });
 
-// Logout
 const btnLogout = document.getElementById("btnLogout");
 if (btnLogout) {
     btnLogout.addEventListener("click", () => {
@@ -24,7 +21,6 @@ if (btnLogout) {
     });
 }
 
-// Drawer de Últimos Movimientos
 const drawer = document.getElementById("drawerMovimientos");
 const btnUltimos = document.getElementById("btnUltimos");
 const drawerClose = document.getElementById("drawerClose");
@@ -53,7 +49,6 @@ function actualizarUltimosMovimientos() {
         ...gastosCache.map((g) => ({ ...g, tipo: "Gasto" })),
     ];
 
-    // Ordenar descendente por fecha
     combinados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     const top10 = combinados.slice(0, 10);
 
@@ -83,7 +78,6 @@ function actualizarUltimosMovimientos() {
     });
 }
 
-// Resumen y Gráfico
 function actualizarResumen(totalIngresos, totalGastos) {
     const lblIng = $("#totalIngresosResumen");
     const lblGas = $("#totalGastosResumen");

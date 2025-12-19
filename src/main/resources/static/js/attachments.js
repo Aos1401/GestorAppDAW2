@@ -1,180 +1,267 @@
-console.log("--> CARGANDO ATTACHMENTS.JS (MODO DEBUG)");
+console.log("--> CARGANDO ATTACHMENTS.JS (TEMP + PREVIEW REAL, SIN HEAD)");
 
 const fileInput = document.getElementById("fileInput");
-let uploadMeta = { tipo: null, id: null, context: null };
 
-// 1. COMPROBAR SI LOS BOTONES EXISTEN EN EL HTML
-window.addEventListener("DOMContentLoaded", () => {
-    console.log("--> Verificando botones en el HTML...");
+let tempTokenIngreso = null;
+let tempTokenGasto = null;
+let currentCtx = null;
 
-    const btnVerIngreso = document.getElementById("btnVerAdjuntoIngreso");
-    const btnVerGasto = document.getElementById("btnVerAdjuntoGasto");
-
-    if (!btnVerIngreso) console.error("❌ ERROR CRÍTICO: No encuentro el botón 'btnVerAdjuntoIngreso' en el HTML.");
-    else console.log("✅ Botón 'btnVerAdjuntoIngreso' encontrado (estado oculto: " + btnVerIngreso.classList.contains("is-hidden") + ")");
-
-    if (!btnVerGasto) console.error("❌ ERROR CRÍTICO: No encuentro el botón 'btnVerAdjuntoGasto' en el HTML.");
-    else console.log("✅ Botón 'btnVerAdjuntoGasto' encontrado.");
-});
-
-// 2. CONFIGURAR CLICK EN LOS CLIPS
-["ingreso", "gasto"].forEach(ctx => {
-    const capitalized = ctx.charAt(0).toUpperCase() + ctx.slice(1);
-
-    const btnAdd = document.getElementById(`btnAdjuntar${capitalized}`);
-    const btnVer = document.getElementById(`btnVerAdjunto${capitalized}`);
-
-    // Click en "Adjuntar"
-    if (btnAdd) {
-        btnAdd.addEventListener("click", () => {
-            const inputId = document.getElementById(`${ctx}Id`);
-            const id = inputId ? inputId.value : null;
-
-            console.log(`--> Click en Adjuntar ${capitalized}. ID detectado: ${id}`);
-
-            if (!id) {
-                alert("Primero guarda el movimiento.");
-                return;
-            }
-
-            // Guardamos el contexto
-            uploadMeta = { tipo: `${ctx}s`, id: id, context: ctx };
-            console.log("--> Meta guardado:", uploadMeta);
-
-            fileInput.click();
-        });
-    }
-
-    // Click en "Ver"
-    if (btnVer) {
-        btnVer.addEventListener("click", () => {
-            const inputId = document.getElementById(`${ctx}Id`);
-            const id = inputId ? inputId.value : null;
-            if (id) abrirModalAdjunto(`${ctx}s`, id);
-        });
-    }
-});
-
-// 3. EVENTO DE SUBIDA (AQUÍ ESTÁ LA CLAVE)
-if (fileInput) {
-    fileInput.addEventListener("change", async (e) => {
-        console.log("--> Archivo seleccionado. Iniciando subida...");
-
-        const file = e.target.files[0];
-        if (!file || !uploadMeta.id) {
-            console.error("❌ Cancelado: No hay archivo o no hay ID.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            const url = `${API_FILES}/${uploadMeta.tipo}/${uploadMeta.id}`;
-            console.log("--> Enviando a:", url);
-
-            const resp = await fetch(url, { method: "POST", body: formData });
-
-            if (!resp.ok) throw new Error("Error en la petición fetch");
-
-            console.log("✅ Subida exitosa. Intentando mostrar botón...");
-            alert("Archivo subido. Mira si aparece el botón 'Ver adjunto'.");
-
-            // INTENTO FORZAR LA VISIBILIDAD
-            alternarBotones(uploadMeta.context, true);
-
-        } catch (error) {
-            console.error("❌ ERROR AL SUBIR:", error);
-            alert("Error al subir el archivo.");
-        } finally {
-            fileInput.value = "";
-        }
-    });
+function setTempToken(ctx, token) {
+  if (ctx === "ingreso") tempTokenIngreso = token;
+  if (ctx === "gasto") tempTokenGasto = token;
+}
+function getTempToken(ctx) {
+  return ctx === "ingreso" ? tempTokenIngreso : tempTokenGasto;
+}
+function clearTempToken(ctx) {
+  setTempToken(ctx, null);
+}
+function capitalized(ctx) {
+  return ctx.charAt(0).toUpperCase() + ctx.slice(1);
 }
 
-// 4. FUNCIÓN PARA CAMBIAR BOTONES
 function alternarBotones(ctx, tieneArchivo) {
-    console.log(`--> Ejecutando alternarBotones para contexto: '${ctx}', tieneArchivo: ${tieneArchivo}`);
+  const cap = capitalized(ctx);
+  const btnAdd = document.getElementById(`btnAdjuntar${cap}`);
+  const btnVer = document.getElementById(`btnVerAdjunto${cap}`);
+  if (!btnAdd || !btnVer) return;
 
-    const capitalized = ctx.charAt(0).toUpperCase() + ctx.slice(1);
-    const btnAdd = document.getElementById(`btnAdjuntar${capitalized}`);
-    const btnVer = document.getElementById(`btnVerAdjunto${capitalized}`);
-
-    if (!btnAdd || !btnVer) {
-        console.error(`❌ ERROR: No encuentro los botones para ${ctx}`);
-        return;
-    }
-
-    if (tieneArchivo) {
-        console.log(`--> Ocultando ${btnAdd.id}, Mostrando ${btnVer.id}`);
-        btnAdd.classList.add("is-hidden");
-        btnVer.classList.remove("is-hidden");
-    } else {
-        console.log(`--> Mostrando ${btnAdd.id}, Ocultando ${btnVer.id}`);
-        btnAdd.classList.remove("is-hidden");
-        btnVer.classList.add("is-hidden");
-    }
+  if (tieneArchivo) {
+    btnAdd.classList.add("is-hidden");
+    btnVer.classList.remove("is-hidden");
+  } else {
+    btnAdd.classList.remove("is-hidden");
+    btnVer.classList.add("is-hidden");
+  }
 }
 
-// 5. VERIFICACIÓN AL EDITAR
-window.verificarAdjunto = async (tipoPlural, id, ctxSingular) => {
-    console.log(`--> Verificando adjunto existente para ${tipoPlural}/${id}`);
-
-    // Reset inicial
-    alternarBotones(ctxSingular, false);
-
-    try {
-        const resp = await fetch(`${API_FILES}/${tipoPlural}/${id}`, { method: "HEAD" });
-        if (resp.ok) {
-            console.log("✅ Archivo existente detectado. Mostrando botón.");
-            alternarBotones(ctxSingular, true);
-        } else {
-            console.log("ℹ️ No hay archivo previo.");
-        }
-    } catch (e) {
-        console.error("Error verificando adjunto", e);
-    }
-};
-
-// 6. MODAL (Igual que antes pero con logs)
+// modal
 const attachmentModal = document.getElementById("attachmentModal");
 const attachmentPreview = document.getElementById("attachmentPreview");
 
-function abrirModalAdjunto(tipo, id) {
-    console.log(`--> Abriendo modal para ${tipo}/${id}`);
-    if (!attachmentModal) return;
+function abrirModal() {
+  attachmentModal?.classList.remove("is-hidden");
+}
+function cerrarModal() {
+  attachmentModal?.classList.add("is-hidden");
+}
 
-    const timestamp = new Date().getTime();
-    const url = `${API_FILES}/${tipo}/${id}?t=${timestamp}`;
+function esImagenPorNombre(name = "") {
+  const n = name.toLowerCase();
+  return n.endsWith(".png") || n.endsWith(".jpg") || n.endsWith(".jpeg") || n.endsWith(".gif") || n.endsWith(".webp");
+}
 
-    attachmentPreview.innerHTML = `
-        <h4 style="margin-top:0; margin-bottom:15px; text-align:center;">Archivo Adjunto</h4>
-        <div style="text-align:center; margin-bottom:15px;">
-            <img src="${url}"
-                 style="max-width: 100%; max-height: 300px; border-radius: 8px;"
-                 onerror="this.style.display='none'; document.getElementById('msg-error').style.display='block';"
-            />
-            <p id="msg-error" style="display:none; color:red;">No se puede previsualizar (PDF o error)</p>
-        </div>
-        <div style="display:flex; justify-content:center; gap:10px;">
-            <a href="${url}" target="_blank" class="btn btn-outline">Abrir / Descargar</a>
-            <button class="btn btn-danger" onclick="eliminarAdjunto('${tipo}', ${id})">Eliminar</button>
-        </div>
+function renderPreview({ title, url, isTemp, tipo, id, token, fileName }) {
+  if (!attachmentPreview) return;
+
+  const tsUrl = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+  const isImg = esImagenPorNombre(fileName || url);
+
+  const previewBlock = isImg
+    ? `<img src="${tsUrl}" style="max-width:100%; max-height:300px; border-radius:8px;" />`
+    : `
+      <iframe src="${tsUrl}" style="width:100%; height:320px; border:1px solid #e5e7eb; border-radius:8px;"></iframe>
+      <p style="margin:10px 0 0; text-align:center; color:#64748b; font-size:0.9rem;">
+        Si no se previsualiza, ábrelo en una pestaña nueva.
+      </p>
     `;
-    attachmentModal.classList.remove("is-hidden");
+
+  const acciones = isTemp
+    ? `
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <a href="${tsUrl}" target="_blank" class="btn btn-outline">Abrir</a>
+        <button class="btn btn-danger" onclick="eliminarTempActual('${token}')">Eliminar</button>
+      </div>
+    `
+    : `
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <a href="${tsUrl}" target="_blank" class="btn btn-outline">Abrir / Descargar</a>
+        <button class="btn btn-danger" onclick="eliminarAdjunto('${tipo}', ${id})">Eliminar</button>
+      </div>
+    `;
+
+  attachmentPreview.innerHTML = `
+    <h4 style="margin-top:0; margin-bottom:15px; text-align:center;">${title}</h4>
+    <div style="text-align:center; margin-bottom:15px;">
+      ${previewBlock}
+    </div>
+    ${acciones}
+  `;
+
+  abrirModal();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  ["ingreso", "gasto"].forEach((ctx) => {
+    const cap = capitalized(ctx);
+
+    const btnAdd = document.getElementById(`btnAdjuntar${cap}`);
+    const btnVer = document.getElementById(`btnVerAdjunto${cap}`);
+
+    btnAdd?.addEventListener("click", () => {
+      currentCtx = ctx;
+      fileInput?.click();
+    });
+
+    btnVer?.addEventListener("click", () => {
+      const id = document.getElementById(`${ctx}Id`)?.value;
+      const token = getTempToken(ctx);
+
+      if (id) return abrirModalAdjunto(`${ctx}s`, id);
+      if (token) return abrirModalAdjuntoTemp(token);
+
+      alert("No hay adjunto para mostrar.");
+    });
+
+    alternarBotones(ctx, false);
+  });
+
+  document.getElementById("closeAttachmentModal")?.addEventListener("click", cerrarModal);
+});
+
+fileInput?.addEventListener("change", async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!currentCtx) {
+    console.warn("No hay contexto (ingreso/gasto) para el upload.");
+    fileInput.value = "";
+    return;
+  }
+
+  const ctx = currentCtx;
+  currentCtx = null;
+
+  try {
+    const prev = getTempToken(ctx);
+    if (prev) {
+      await fetch(`${API_FILES}/temp/${encodeURIComponent(prev)}`, { method: "DELETE" }).catch(() => {});
+      clearTempToken(ctx);
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const resp = await fetch(`${API_FILES}/temp`, { method: "POST", body: formData });
+    if (!resp.ok) throw new Error("No se pudo subir el archivo temporal.");
+
+    const token = (await resp.text()).trim();
+    setTempToken(ctx, token);
+
+    alternarBotones(ctx, true);
+
+    console.log(`TEMP subido (${ctx}):`, token);
+
+    abrirModalAdjuntoTemp(token, file.name);
+
+  } catch (err) {
+    console.error("Error subiendo TEMP:", err);
+    alert("Error al subir el archivo.");
+    alternarBotones(ctx, false);
+    clearTempToken(ctx);
+  } finally {
+    fileInput.value = "";
+  }
+});
+
+window.openAdjuntoDefinitivo = (tipoPlural, id) => abrirModalAdjunto(tipoPlural, id);
+
+window.openAdjuntoTemp = (token) => abrirModalAdjuntoTemp(token);
+
+// API: adjuntar TEMP al movimiento (se llama ingresos y gastos)
+window.attachTempIfAny = async (ctx, finalId) => {
+  const token = getTempToken(ctx);
+  if (!token) return false;
+
+  const tipoPlural = `${ctx}s`;
+  const form = new FormData();
+  form.append("token", token);
+
+  const resp = await fetch(`${API_FILES}/${tipoPlural}/${finalId}/attach-temp`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!resp.ok) throw new Error("No se pudo asociar el archivo al movimiento.");
+
+  clearTempToken(ctx);
+  return true;
+};
+
+window.verificarAdjunto = async (tipoPlural, id, ctxSingular) => {
+  alternarBotones(ctxSingular, false);
+
+  try {
+    const resp = await fetch(`${API_FILES}/${tipoPlural}/${id}?t=${Date.now()}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (resp.ok) {
+      alternarBotones(ctxSingular, true);
+    }
+  } catch (e) {
+    console.error("Error verificando adjunto", e);
+  }
+};
+
+function abrirModalAdjunto(tipo, id) {
+  const url = `${API_FILES}/${tipo}/${id}`;
+  renderPreview({
+    title: "Archivo adjunto",
+    url,
+    isTemp: false,
+    tipo,
+    id,
+    fileName: url,
+  });
 }
 
 window.eliminarAdjunto = async (tipo, id) => {
-    if(!confirm("¿Borrar archivo?")) return;
-    try {
-        await fetch(`${API_FILES}/${tipo}/${id}`, { method: "DELETE" });
-        alert("Eliminado");
-        attachmentModal.classList.add("is-hidden");
-        const ctx = tipo.slice(0, -1);
-        alternarBotones(ctx, false);
-    } catch(e) { console.error(e); }
+  if (!confirm("¿Borrar archivo?")) return;
+
+  try {
+    await fetch(`${API_FILES}/${tipo}/${id}`, { method: "DELETE" });
+    alert("Eliminado");
+    cerrarModal();
+
+    const ctx = tipo.slice(0, -1); // ingresos -> ingreso
+    alternarBotones(ctx, false);
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo eliminar el archivo.");
+  }
 };
 
-document.getElementById("closeAttachmentModal")?.addEventListener("click", () => {
-    attachmentModal.classList.add("is-hidden");
-});
+function abrirModalAdjuntoTemp(token, originalName = "") {
+  const url = `${API_FILES}/temp/${encodeURIComponent(token)}`;
+  renderPreview({
+    title: "Adjunto temporal (antes de guardar)",
+    url,
+    isTemp: true,
+    token,
+    fileName: originalName || token,
+  });
+}
+
+window.eliminarTempActual = async (token) => {
+  if (!confirm("¿Borrar el adjunto temporal?")) return;
+
+  try {
+    await fetch(`${API_FILES}/temp/${encodeURIComponent(token)}`, { method: "DELETE" });
+    alert("Adjunto temporal eliminado.");
+    cerrarModal();
+
+    if (tempTokenIngreso === token) {
+      clearTempToken("ingreso");
+      alternarBotones("ingreso", false);
+    }
+    if (tempTokenGasto === token) {
+      clearTempToken("gasto");
+      alternarBotones("gasto", false);
+    }
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo eliminar el archivo temporal.");
+  }
+};
