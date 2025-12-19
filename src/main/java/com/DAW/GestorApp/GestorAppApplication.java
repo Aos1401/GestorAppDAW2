@@ -17,3 +17,4 @@ public class GestorAppApplication {
         SpringApplication.run(GestorAppApplication.class, args);
     }
 }
+
